@@ -13,13 +13,12 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	awsapigatewayv2 "github.com/aws/aws-cdk-go/awscdkapigatewayv2alpha/v2"
-	integrations "github.com/aws/aws-cdk-go/awscdkapigatewayv2integrationsalpha/v2"
 	awslambdago "github.com/aws/aws-cdk-go/awscdklambdagoalpha/v2"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
 
-func NewCreatePostFunction(scope constructs.Construct, id string, db awsdynamodb.ITable, api awsapigatewayv2.HttpApi, monitor c.IMonitor) awslambda.IFunction {
+func NewCreatePostFunction(scope constructs.Construct, id string, db awsdynamodb.ITable, api c.Api, monitor c.IMonitor) awslambda.IFunction {
 	s := constructs.NewConstruct(scope, &id)
 
 	env := &map[string]*string{
@@ -52,9 +51,8 @@ func NewCreatePostFunction(scope constructs.Construct, id string, db awsdynamodb
 	// -----------------------add our route to our API Gateway -----------------
 	// -------------------------------------------------------------------------
 	//
-	api.AddRoutes(&awsapigatewayv2.AddRoutesOptions{
-		Integration: integrations.NewHttpLambdaIntegration(jsii.String("createPost"), handler, &integrations.HttpLambdaIntegrationProps{}),
-		Path:        jsii.String("/post"),
+	api.AddLambdaRoute("createPost", handler, c.AddRouteOptions{
+		Path: jsii.String("/post"),
 		Methods: &[]awsapigatewayv2.HttpMethod{
 			awsapigatewayv2.HttpMethod_POST,
 		},
